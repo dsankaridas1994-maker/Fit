@@ -1,0 +1,152 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidTimestamp(val) {
+      return val is timestamp && val <= request.time;
+    }
+
+    function isValidUser(data) {
+      return data.size() >= 2
+        && data.userId is string && data.userId == request.auth.uid
+        && isValidTimestamp(data.createdAt);
+    }
+
+    function isValidUserProfile(data) {
+      return data.size() >= 4
+        && data.userId is string && data.userId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.level is int && data.level >= 1
+        && data.xp is int && data.xp >= 0;
+    }
+
+    function isValidExercise(data) {
+      return data.size() >= 3
+        && data.name is string && data.name.size() > 0
+        && data.targetMuscle is string
+        && data.difficulty is string;
+    }
+
+    function isValidWorkout(data) {
+      return data.size() >= 4
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 150
+        && data.category is string
+        && data.difficulty is string
+        && data.estimatedMinutes is int && data.estimatedMinutes > 0;
+    }
+
+    function isValidWorkoutSession(data) {
+      return data.size() >= 5
+        && data.userId is string && data.userId == request.auth.uid
+        && data.workoutTitle is string && data.workoutTitle.size() > 0
+        && data.durationSeconds is int && data.durationSeconds >= 0
+        && data.caloriesBurned is int && data.caloriesBurned >= 0
+        && isValidTimestamp(data.completedAt);
+    }
+
+    function isValidWorkoutPlan(data) {
+      return data.size() >= 4
+        && data.userId is string && data.userId == request.auth.uid
+        && data.title is string && data.title.size() > 0
+        && data.goal is string
+        && isValidTimestamp(data.createdAt);
+    }
+
+    function isValidGoal(data) {
+      return data.size() >= 4
+        && data.userId is string && data.userId == request.auth.uid
+        && data.title is string && data.title.size() > 0
+        && data.targetValue is int && data.targetValue > 0
+        && data.isCompleted is bool;
+    }
+
+    function isValidAchievement(data) {
+      return data.size() >= 4
+        && data.userId is string && data.userId == request.auth.uid
+        && data.achievementKey is string
+        && data.title is string
+        && isValidTimestamp(data.unlockedAt);
+    }
+
+    function isValidAppSettings(data) {
+      return data.size() >= 2
+        && data.userId is string && data.userId == request.auth.uid
+        && data.isDarkTheme is bool;
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidUser(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+
+    // User Profiles
+    match /userProfiles/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+
+    // Exercises: Read public exercises or own custom exercises
+    match /exercises/{exerciseId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.isPublic == true || resource.data.userId == request.auth.uid);
+      allow create, update: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidExercise(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Workouts: Read public workouts or own custom workouts
+    match /workouts/{workoutId} {
+      allow read: if isAuthenticated() && (resource == null || resource.data.isPublic == true || resource.data.userId == request.auth.uid);
+      allow create, update: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidWorkout(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Workout Sessions: Private per user
+    match /workoutSessions/{sessionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidWorkoutSession(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidWorkoutSession(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Workout Plans: Private per user
+    match /workoutPlans/{planId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidWorkoutPlan(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidWorkoutPlan(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Goals: Private per user
+    match /goals/{goalId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidGoal(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidGoal(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Achievements: Private per user
+    match /achievements/{achievementId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidAchievement(request.resource.data);
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && isValidAchievement(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // App Settings: Private per user
+    match /appSettings/{userId} {
+      allow read: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isValidAppSettings(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+  }
+}

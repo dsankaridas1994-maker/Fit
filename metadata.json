@@ -1,0 +1,6 @@
+{
+  "name": "INFFIT",
+  "description": "High-intensity workout tracker with interactive workout player, exercise animations, progress rings, streaks, and achievements.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

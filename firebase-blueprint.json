@@ -1,0 +1,191 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents an authenticated user account",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Athlete profile attributes, fitness goals, and XP stats",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "age": { "type": "integer" },
+        "fitnessGoal": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "preferredWorkoutType": { "type": "string" },
+        "availableEquipment": { "type": "string" },
+        "workoutFrequency": { "type": "integer" },
+        "level": { "type": "integer" },
+        "xp": { "type": "integer" },
+        "rankTitle": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "level", "xp"]
+    },
+    "Exercise": {
+      "title": "Exercise",
+      "description": "Fitness movement with anatomy, instruction, and execution cues",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "targetMuscle": { "type": "string" },
+        "secondaryMuscles": { "type": "string" },
+        "equipment": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "instructions": { "type": "string" },
+        "commonMistakes": { "type": "string" },
+        "durationSec": { "type": "integer" },
+        "targetReps": { "type": "integer" },
+        "isRepBased": { "type": "boolean" },
+        "isPublic": { "type": "boolean" },
+        "userId": { "type": "string" }
+      },
+      "required": ["name", "targetMuscle", "difficulty"]
+    },
+    "Workout": {
+      "title": "Workout",
+      "description": "Structured workout routine comprising multiple exercises",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "estimatedMinutes": { "type": "integer" },
+        "calorieBurn": { "type": "integer" },
+        "isPublic": { "type": "boolean" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "category", "difficulty", "estimatedMinutes"]
+    },
+    "WorkoutSession": {
+      "title": "WorkoutSession",
+      "description": "A completed workout session logged to cloud history",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "workoutId": { "type": "string" },
+        "workoutTitle": { "type": "string" },
+        "durationSeconds": { "type": "integer" },
+        "caloriesBurned": { "type": "integer" },
+        "exercisesCompleted": { "type": "integer" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "workoutTitle", "durationSeconds", "caloriesBurned", "completedAt"]
+    },
+    "WorkoutPlan": {
+      "title": "WorkoutPlan",
+      "description": "Multi-day or periodized training plan",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "goal": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "daysPerWeek": { "type": "integer" },
+        "planJson": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "goal", "createdAt"]
+    },
+    "Goal": {
+      "title": "Goal",
+      "description": "User fitness milestone or consistency objective",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "targetValue": { "type": "integer" },
+        "currentValue": { "type": "integer" },
+        "unit": { "type": "string" },
+        "isCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "targetValue", "isCompleted"]
+    },
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Unlocked badge or milestone reward",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "achievementKey": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "unlockedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "achievementKey", "title", "unlockedAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "User preferences and system configuration",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "isDarkTheme": { "type": "boolean" },
+        "isVoiceEnabled": { "type": "boolean" },
+        "isSoundEnabled": { "type": "boolean" },
+        "isVibrationEnabled": { "type": "boolean" },
+        "selectedTheme": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "isDarkTheme"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User accounts"
+    },
+    "/userProfiles/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Athlete profile details"
+    },
+    "/exercises/{exerciseId}": {
+      "schema": { "$ref": "#/entities/Exercise" },
+      "description": "Exercise definitions"
+    },
+    "/workouts/{workoutId}": {
+      "schema": { "$ref": "#/entities/Workout" },
+      "description": "Workout routines"
+    },
+    "/workoutSessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/WorkoutSession" },
+      "description": "Recorded workout completions"
+    },
+    "/workoutPlans/{planId}": {
+      "schema": { "$ref": "#/entities/WorkoutPlan" },
+      "description": "Structured AI and custom training plans"
+    },
+    "/goals/{goalId}": {
+      "schema": { "$ref": "#/entities/Goal" },
+      "description": "User fitness goals"
+    },
+    "/achievements/{achievementId}": {
+      "schema": { "$ref": "#/entities/Achievement" },
+      "description": "Athlete achievements"
+    },
+    "/appSettings/{userId}": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Athlete preferences and settings"
+    }
+  }
+}
